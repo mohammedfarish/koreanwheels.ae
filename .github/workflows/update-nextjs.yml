@@ -1,0 +1,40 @@
+name: Update Next.js Version
+
+on:
+  workflow_dispatch: {} # Run manually from Actions → "Run workflow"
+  repository_dispatch:
+    # Can be triggered externally via webhook to watch vercel/nextjs releases
+    types: [nextjs-release]
+
+jobs:
+  update-nextjs:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install latest Next.js, React, and React-DOM
+        run: npm install next@latest react@latest react-dom@latest
+
+      - name: Configure Git
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+      - name: Commit and push changes
+        run: |
+          git add package.json package-lock.json
+          git diff --staged --quiet || git commit -m "chore: update next, react, and react-dom to latest"
+          git push
