@@ -1,5 +1,6 @@
-import dbConnect from "../database/dbConnect";
-import { authenticate } from "./site-lock-auth";
+import dbConnect from "@/utils/database/dbConnect";
+import { login, logout } from "./auth";
+import { createUser } from "./user";
 
 export const revalidate = async () => 0;
 
@@ -8,9 +9,22 @@ const actions = [
     name: "enquire",
     handler: () => ({ message: "Hello, world!" }),
   },
+
   {
-    name: "site-lock-auth",
-    handler: authenticate,
+    name: "login",
+    handler: login,
+  },
+  {
+    name: "logout",
+    handler: logout,
+  },
+
+  {
+    name: "create-user",
+    handler: createUser,
+    auth: {
+      minRole: 10,
+    },
   },
 ] as const;
 

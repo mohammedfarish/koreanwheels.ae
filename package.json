@@ -12,8 +12,10 @@
   },
   "dependencies": {
     "axios": "^1.13.1",
+    "bcryptjs": "^3.0.3",
     "chance": "^1.1.13",
-    "jsonwebtoken": "^9.0.2",
+    "jsonwebtoken": "^9.0.3",
+    "lucide-react": "^0.563.0",
     "moment-timezone": "^0.6.0",
     "mongoose": "^8.19.2",
     "next": "^16.1.6",
@@ -21,7 +23,9 @@
     "react-dom": "^19.2.4",
     "react-fast-marquee": "^1.6.5",
     "react-select": "^5.10.2",
-    "tailwind-merge": "^3.3.1"
+    "tailwind-merge": "^3.3.1",
+    "zod": "^4.3.6",
+    "zustand": "^5.0.11"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.17",

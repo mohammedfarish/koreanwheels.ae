@@ -1,32 +1,46 @@
+import { AdminLogin } from "@/components/admin/homepage/AdminLogin";
+import Dashboard from "@/components/admin/homepage/Dashboard";
 import Homepage from "@/components/homepage/Homepage";
+import { verifyAdminAuth } from "@/utils/functions/admin/auth";
+import { getSiteType } from "@/utils/functions/domain";
+import { Metadata } from "next";
 
-export async function getNextjsVersion(): Promise<string> {
-  try {
-    const response = await fetch("https://api.github.com/repos/vercel/next.js/releases/latest", {
-      next: { revalidate: 3600 },
-    });
+export const generateMetadata = async (): Promise<Metadata> => {
+  const siteType = await getSiteType();
 
-    if (!response.ok) {
-      throw new Error(`GitHub API returned ${response.status}`);
+  if (siteType === "admin") {
+    const verified = await verifyAdminAuth();
+
+    if (verified) {
+      return {
+        title: "Dashboard",
+      };
     }
 
-    const data = await response.json();
-
-    const version = data.tag_name?.replace(/^v/, "") || "16.0.1";
-    return version;
-  } catch (error) {
-    console.error("Failed to fetch Next.js version:", error);
-
-    return "16.0.1";
+    return {
+      title: "Korean Wheels Admin",
+      description: "Korean Wheels Admin",
+    };
   }
-}
+
+  return {
+    title: "Korean Wheels",
+    description: "Korean Wheels",
+  };
+};
 
 export default async function Page() {
-  const nextjsVersion = await getNextjsVersion();
+  const siteType = await getSiteType();
+  if (siteType === "admin") {
+    const verified = await verifyAdminAuth();
+    if (!verified) {
+      return <AdminLogin />;
+    }
 
-  const majorVersion = nextjsVersion.split(".")[0];
+    return <Dashboard />;
+  }
 
-  return <Homepage majorVersion={majorVersion} nextjsVersion={nextjsVersion} />;
+  return <Homepage />;
 }
 
 export const revalidate = 0;

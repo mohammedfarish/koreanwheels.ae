@@ -1,12 +1,12 @@
 import { headers } from "next/headers";
 
 import isdev from "./isdev";
+import { domains } from "../config";
 
 export const getDomain = async () => {
   const headersList = await headers();
   const host = headersList.get("host");
   if (!host) throw new Error("Host not found");
-  if (isdev) return "somedomain.com";
   return host;
 };
 
@@ -44,4 +44,12 @@ export const getIP = async () => {
   }
 
   return undefined;
+};
+
+type SiteType = "customer" | "admin" | "none";
+export const getSiteType = async (): Promise<SiteType> => {
+  const domain = await getDomain();
+  if (domains.customer.includes(domain)) return "customer";
+  if (domains.admin.includes(domain)) return "admin";
+  return "none";
 };

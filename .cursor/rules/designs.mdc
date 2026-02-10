@@ -1,0 +1,6 @@
+---
+alwaysApply: true
+---
+
+ALWAYS use vercel's design style.
+ALWAYS use Image coomponent from nextjs for images.
