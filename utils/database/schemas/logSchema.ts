@@ -6,7 +6,7 @@ export type LogInDBType = {
 
   action: string;
   ip: string;
-  user: string;
+  user?: string;
   towards: string;
   siteType: Awaited<ReturnType<typeof getSiteType>>;
 

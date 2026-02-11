@@ -4,8 +4,9 @@ import moment from "moment-timezone";
 import { sleep } from "../misc";
 import { getUser } from "./user";
 import z from "zod";
-import userSchema from "@/utils/database/schemas/userSchema";
+import userSchema, { UserInDBType } from "@/utils/database/schemas/userSchema";
 import bcrypt from "bcryptjs";
+import { getSiteType } from "../domain";
 
 const tokenData = async (id: string) => {
   const user = await getUser(id);
@@ -23,12 +24,25 @@ const generateAdminAuthCookie = async (id: string) => {
   });
 };
 
-export const verifyAdminAuth = async () => {
+export const verifyAdminAuth = async (forSiteType: Awaited<ReturnType<typeof getSiteType>>, role?: number) => {
+  const siteType = await getSiteType();
+  if (siteType !== forSiteType) return undefined;
+
   const token = (await cookies()).get(tokenName);
-  if (!token) return false;
+  if (!token) return undefined;
+
   const verify = jwt.verify(token.value, authSecret) as Awaited<ReturnType<typeof tokenData>> | undefined;
-  if (!verify) return false;
-  return verify;
+  if (!verify) return undefined;
+
+  const user = await getUser(verify.id);
+  if (!user) return undefined;
+
+  if (!user.active) return undefined;
+  if (user.siteType !== forSiteType) return undefined;
+
+  if (role && user.role < role) return undefined;
+
+  return user;
 };
 
 const loginRequest = z.object({
@@ -39,7 +53,7 @@ const loginRequest = z.object({
 export const login = async (data: z.infer<typeof loginRequest>) => {
   const { email, password } = loginRequest.parse(data);
 
-  const user = await userSchema.findOne({ email });
+  const user = await userSchema.findOne({ email, siteType: "admin" } as Partial<UserInDBType>);
   if (!user) throw new Error("User not found");
   const passwordMatch = await bcrypt.compare(password, user.password);
   if (!passwordMatch) throw new Error("Invalid password");

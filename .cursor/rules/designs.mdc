@@ -2,5 +2,5 @@
 alwaysApply: true
 ---
 
-ALWAYS use vercel's design style.
-ALWAYS use Image coomponent from nextjs for images.
+ALWAYS preline components.
+ALWAYS use Image component from nextjs for images.

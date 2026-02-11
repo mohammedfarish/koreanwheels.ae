@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { verifyAdminAuth } from "@/utils/functions/admin/auth";
-import UserPage from "@/components/admin/user/UserPage";
+import CustomerPage from "@/components/admin/customer/CustomerPage";
 
 const page = async () => {
   const isLoggedIn = await verifyAdminAuth("admin", 90);
@@ -9,7 +9,7 @@ const page = async () => {
     return redirect("/");
   }
 
-  return <UserPage />;
+  return <CustomerPage />;
 };
 
 export default page;

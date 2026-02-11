@@ -1,2 +1,30 @@
 @import "tailwindcss";
 @config "../tailwind.config.ts";
+
+/* Class-based dark mode for Tailwind dark: utilities */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Preline UI - https://preline.co/docs/frameworks-nextjs.html */
+@import "preline/variants.css";
+@source "../node_modules/preline/dist/*.js";
+/* Plugins */
+@plugin "@tailwindcss/forms";
+/* Preline Themes */
+@import "./themes/theme.css";
+
+/* Optional Preline UI styles */
+@layer base {
+
+  /* Smooth fade when switching theme - applied globally, never overridden by Preline */
+  html,
+  html * {
+    transition-property: background-color, color, border-color, fill, stroke;
+    transition-duration: 0.3s;
+    transition-timing-function: ease-in-out;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}

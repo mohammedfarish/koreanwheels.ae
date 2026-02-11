@@ -9,7 +9,7 @@ export const generateMetadata = async (): Promise<Metadata> => {
   const siteType = await getSiteType();
 
   if (siteType === "admin") {
-    const verified = await verifyAdminAuth();
+    const verified = await verifyAdminAuth("admin");
 
     if (verified) {
       return {
@@ -32,7 +32,7 @@ export const generateMetadata = async (): Promise<Metadata> => {
 export default async function Page() {
   const siteType = await getSiteType();
   if (siteType === "admin") {
-    const verified = await verifyAdminAuth();
+    const verified = await verifyAdminAuth("admin");
     if (!verified) {
       return <AdminLogin />;
     }

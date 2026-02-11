@@ -3,6 +3,77 @@ import React, { ComponentProps as ExtractProps } from "react";
 import { twMerge } from "tailwind-merge";
 import Select from "react-select";
 import AsyncSelect from "react-select/async";
+import type { StylesConfig } from "react-select";
+
+// Preline theme colours for react-select – uses CSS variables for theme adaptation
+const selectThemeStyles: StylesConfig<Option, boolean> = {
+  control: (base, state) => ({
+    ...base,
+    minHeight: 40,
+    borderRadius: "0.5rem",
+    borderColor: state.isFocused ? "var(--color-primary)" : "var(--color-border)",
+    backgroundColor: "var(--color-layer)",
+    boxShadow: state.isFocused ? "0 0 0 2px var(--color-primary)" : undefined,
+    "&:hover": {
+      borderColor: state.isFocused ? "var(--color-primary)" : "var(--color-border)",
+    },
+  }),
+  menu: (base) => ({
+    ...base,
+    borderRadius: "0.5rem",
+    backgroundColor: "var(--color-select)",
+    border: "1px solid var(--color-select-line)",
+    boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
+  }),
+  menuList: (base) => ({
+    ...base,
+    padding: "0.25rem",
+    borderRadius: "0.5rem",
+  }),
+  option: (base, state) => ({
+    ...base,
+    borderRadius: "0.375rem",
+    color: "var(--color-select-item-foreground)",
+    backgroundColor: state.isFocused ? "var(--color-select-item-focus)" : state.isSelected ? "var(--color-select-item-active)" : "transparent",
+    cursor: "pointer",
+    "&:active": {
+      backgroundColor: "var(--color-select-item-active)",
+    },
+  }),
+  singleValue: (base) => ({
+    ...base,
+    color: "var(--color-layer-foreground)",
+  }),
+  placeholder: (base) => ({
+    ...base,
+    color: "var(--color-muted-foreground)",
+  }),
+  input: (base) => ({
+    ...base,
+    color: "var(--color-layer-foreground)",
+  }),
+  dropdownIndicator: (base, state) => ({
+    ...base,
+    color: "var(--color-muted-foreground)",
+    "&:hover": {
+      color: "var(--color-layer-foreground)",
+    },
+  }),
+  clearIndicator: (base) => ({
+    ...base,
+    color: "var(--color-muted-foreground)",
+    "&:hover": {
+      color: "var(--color-layer-foreground)",
+    },
+  }),
+  indicatorSeparator: () => ({
+    display: "none",
+  }),
+  menuPortal: (base) => ({
+    ...base,
+    zIndex: 9999,
+  }),
+};
 // import {
 //   Datepicker,
 //   DatepickerProps as DatePickerPropsType,
@@ -18,13 +89,9 @@ import AsyncSelect from "react-select/async";
 function Label({ label, required }: { label: string; required: boolean }) {
   return (
     <div className="flex">
-      <label className="font-bold text-sm pb-2">{label}</label>
+      <label className="mb-2 block text-sm font-medium text-layer-foreground">{label}</label>
       {required && (
-        <span
-          title="Required"
-          className="text-red-500 ml-1 -mt-1 text-lg cursor-pointer select-none pr-5"
-        >
-          {" "}
+        <span title="Required" className="ml-1 -mt-1 text-lg cursor-pointer select-none text-red-500">
           *
         </span>
       )}
@@ -42,11 +109,7 @@ type Component<Type, Props> = { type: Type } & Props;
 type SelectProps = ExtractProps<typeof Select<Option, boolean>>;
 type AsyncSelectProps = ExtractProps<typeof AsyncSelect<Option, boolean>>;
 
-type InputComponentProps = CommonProps &
-  Component<
-    "text" | "email" | "password",
-    React.InputHTMLAttributes<HTMLInputElement>
-  >;
+type InputComponentProps = CommonProps & Component<"text" | "email" | "password" | "tel", React.InputHTMLAttributes<HTMLInputElement>>;
 
 // type DatePickerProps = DatePickerPropsType & {
 //   onChange?: (date: Date) => void;
@@ -74,28 +137,21 @@ type Props =
 // (CommonProps & Component<TYPE, ExtractProps<COMPONENT>>)
 
 function Input(props: Props) {
-  const {
-    type,
-    label,
-    className,
-    disabled,
-    internalClassName,
-    required,
-    min,
-    max,
-    onChange,
-  } = props;
+  const { type, label, className, disabled, internalClassName, required, min, max, onChange } = props;
 
   const isRequired = required || false;
   const sectionClassName = twMerge("flex flex-col w-full text-sm", className);
 
   if (type === "select") {
     return (
-      <div className={twMerge(sectionClassName, "remove-input-txt-border")}>
+      <div className={sectionClassName}>
         {label && <Label label={label} required={isRequired} />}
 
         <Select
           className="w-full xs:w-full outline-none p-0"
+          styles={selectThemeStyles}
+          menuPortalTarget={typeof document !== "undefined" ? document.body : undefined}
+          menuPosition="fixed"
           onChange={onChange}
           isDisabled={disabled}
           {...props}
@@ -106,11 +162,14 @@ function Input(props: Props) {
 
   if (type === "asyncselect") {
     return (
-      <div className={twMerge(sectionClassName, "remove-input-txt-border")}>
+      <div className={sectionClassName}>
         {label && <Label label={label} required={isRequired} />}
 
         <AsyncSelect
           className="w-full xs:w-full"
+          styles={selectThemeStyles}
+          menuPortalTarget={typeof document !== "undefined" ? document.body : undefined}
+          menuPosition="fixed"
           isDisabled={disabled}
           noOptionsMessage={() => "No options"}
           onChange={onChange}
@@ -120,16 +179,15 @@ function Input(props: Props) {
     );
   }
 
-  if (type === "text" || type === "email" || type === "password") {
+  if (type === "text" || type === "email" || type === "password" || type === "tel") {
     return (
       <div className={sectionClassName}>
         {label && <Label label={label} required={isRequired} />}
 
         <input
-          //   type={type}
           className={twMerge(
             internalClassName,
-            "border border-gray-300 rounded-lg p-2 disabled:opacity-75"
+            "block w-full rounded-lg border border-border bg-layer px-3 py-2 text-sm text-layer-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary disabled:pointer-events-none disabled:opacity-50"
           )}
           onChange={onChange}
           disabled={disabled}
@@ -145,7 +203,10 @@ function Input(props: Props) {
         {label && <Label label={label} required={isRequired} />}
 
         <input
-          className={twMerge(internalClassName, "rounded bg-white")}
+          className={twMerge(
+            internalClassName,
+            "block w-full rounded-lg border border-border px-3 py-2 text-sm file:border-0 file:bg-muted file:mr-4 file:px-4 file:py-2 file:text-sm file:font-medium file:text-layer-foreground disabled:pointer-events-none disabled:opacity-50"
+          )}
           onChange={onChange}
           disabled={disabled}
           {...props}
@@ -159,7 +220,7 @@ function Input(props: Props) {
       <div className={sectionClassName}>
         {label && <Label label={label} required={isRequired} />}
         <textarea
-          className="w-full xs:w-full p-2 border-2 border-gray-200 focus:border-org-color-3 duration-200 outline-none rounded-lg resize-none disabled:opacity-75"
+          className="block w-full rounded-lg border border-border bg-layer px-3 py-2 text-sm text-layer-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary disabled:pointer-events-none disabled:opacity-50"
           rows={3}
           disabled={disabled}
           onChange={onChange}
@@ -173,7 +234,7 @@ function Input(props: Props) {
     return (
       <div className={sectionClassName}>
         <input
-          className="bg-black text-white font-bold cursor-pointer hover:bg-opacity-75 duration-200 rounded-lg p-2 disabled:opacity-75"
+          className="inline-flex w-full items-center justify-center gap-x-2 rounded-lg border border-transparent bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
           onChange={onChange}
           disabled={disabled}
           {...props}
@@ -208,7 +269,7 @@ function Input(props: Props) {
 
       <input
         className={twMerge(
-          "w-full xs:w-full p-2 border-2 border-gray-200 focus:border-org-color-3 duration-200 outline-none rounded-lg",
+          "block w-full rounded-lg border border-border bg-layer px-3 py-2 text-sm text-layer-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary disabled:pointer-events-none disabled:opacity-50",
           internalClassName
         )}
         disabled={disabled}
